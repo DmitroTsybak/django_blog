@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 
@@ -15,14 +16,24 @@ menu = [{'title': "О сайте", 'url_name': 'about'},
 
 def index(request):
     posts = Women.objects.filter(is_published=True)
-    context = {'posts': posts,
-               'cat_selected': 0,
+    paginator=Paginator(posts,2)
+    page_number=request.GET.get("page")
+    page_obj=paginator.get_page(page_number)
+
+    context = {'cat_selected': 0,
+               'page_obj':page_obj,
                'title': 'Главная страница'}
     return render(request, "women/index.html", context=context)
 
 
 def about(request):
-    return render(request, "women/about.html", {"title": "About", "menu": menu})
+    posts=Women.objects.all()
+    paginator=Paginator(posts,5)
+
+    page_number=request.GET.get("page")
+    page_obj=paginator.get_page(page_number)
+
+    return render(request, "women/about.html", {"title": "About", "menu": menu, "page_obj":page_obj})
 
 
 def add_page(request):
@@ -66,7 +77,11 @@ def get_post(request, post_slug):
 def show_categories(request, cat_slug):
     cat = Category.objects.get(slug=cat_slug)
     posts = Women.objects.filter(category_id=cat.id, is_published=True)
-    context = {'posts': posts,
+    paginator = Paginator(posts, 5)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {'page_obj': page_obj,
                'cat_selected': cat.id,
                'title': cat.name}
     return render(request, "women/index.html", context=context)

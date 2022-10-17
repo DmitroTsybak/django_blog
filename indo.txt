@@ -206,3 +206,32 @@ def show_categories(cat_selected): - функція в якій отримуєм
         form = AddPostForm()
     return render(request, "women/addpage.html", {"title": "Add page","form":form})
 
+
+
+
+                                                Paginations
+
+from django.core.paginator import Paginator
+objects = ['john', 'paul', 'george', 'ringo']
+
+p=Paginator(objects,2)  - з будь-якого ітератора вертає обєкт пагінатора розбитого по другому аргументу
+p.count - 4 - вертає клькфсть елементів
+p.num_pages - кількість сторінок
+p.page_range - ітератор з кількістю сторінок, зручно по ньому потім проходитись в циклі і отримувати номер сторінки
+p1=p.gate_page(1) -вертає всю інфу по конкретній сторінці пагінатора!!!
+це обєкт пайтон, алепо ньому можна пробігатися по циклу фор
+p1.object_list - вертає вже список елементів сторінки
+p1.number - вертає число конкретної сторінки
+page2.has_next() - чи є наступна сторінка
+page2.has_previous() ---
+
+has_other_pages() - крута штука показує чи будуть взагалі сторінки і чи по факту потрібна пагінація!!
+next_page_number() - вертає номер наступної сторінки
+previous_page_number() - - -
+
+--- шаблони дивись в документації!!!
+
+В функції представлення
+    paginator=Paginator(posts,2)
+    page_number=request.GET.get("page") - отримую сторінку з браузера "?page=###" -
+    page_obj=paginator.get_page(page_number) - і отримую обєкт пагінації з даною сторінкою!!!
