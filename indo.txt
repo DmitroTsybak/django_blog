@@ -1,0 +1,208 @@
+django-admin - Чтобы посмотреть список команд ядра
+
+django-admin startproject <имя сайта> - создания нашего первого сайта
+
+cd <имя сайта>
+
+python manage.py runserver - происходит запуск локального Веб-сервера
+python manage.py startapp myfirstapp - создадим в нашем сайте первое приложение
+myfirstapp.apps.className - добавляэмо в apps in setting file
+
+
+
+def index(request):
+    return HttpResponse("Страница приложения women.") - вертаэ прототип сторынки
+
+urlpatterns = [
+    path('admin/', admin.site.urls), - урли - передаємо вигляд урла і функція яка вертається
+    path('women/', include(filename of urls), - або передаємо силку на файл де зберігаються всі урли застосунку
+]
+
+
+                        Маршрутизация, обработка исключений запросов, перенаправления
+
+urlpatterns = [
+    path('', index),
+    path('cats/<int:catid>/', categories),  <int:catid> int - це тип данних, а сatid - це перемынна яку
+    отримаємо в строці запиту іпотім передаму в функцію categories
+
+
+def categories(request, catid): в данній функції ми отримуємо цю перемінну, називаємо так же як і в urlpatterns  і птім можел
+в функції обробляти
+    return HttpResponse(f"<h1>Статьи по категориям</h1>{catid}</p>")
+
+
+str – любая не пустая строка, исключая символ ‘/’; <str:catid>
+int – любое положительное целое число, включая 0;  <int:catid>
+slug – слаг, то есть, латиница ASCII таблицы, символы дефиса и подчеркивания; <slug:catid>
+uuid – цифры, малые латинские символы ASCII, дефис;
+path – любая не пустая строка, включая символ ‘/’.
+
+def index(request):
+    print(request.GET) - отримуємо словник гет параметрів, які передалися в запиті через ?
+    наприклад при запиті /women/dimka/?name=dima&adress=4567
+    request.GET  вертає  {'name': ['dima,igor and valera'], 'adress': ['4567']}
+
+
+                                                    404
+
+handler404 = pageNotFound - де handler404 - це назва обработчика помилки 404, а pageNotFound це вже наша функцыя яка буде
+визиватися при помилці page not found прописується в загальних урлахБ а функція в виглядах
+
+також можна генерувати помилку ы в ынших функцыях приневиконанні певних умов і генерувати помилку
+шляхом визову обєкта класу Http404() - який і визиває обработчик
+
+                                                    redirect
+
+def generate_year(request,year):
+    if year > 2020:
+        return redirect ("/") це редірект тимчасовий з кодом 302
+        return redirect ("/",permanent=False) це редірект постійний з кодом 301
+
+
+                                                migrations,models
+створється клас на основі класу моделс, в якому прописуються поля для майбутньої таблиці,
+і потім запусткаєтся міграція -  python manage.py makemigrarions -
+в пакеті міграції створюється файл з міграцією
+
+потім іде запуск команди python manage.py migrate , яка встворює всі таблиці або вносить зміни до наявних
+на основі файлів в пакеті migrations!!!
+
+
+python manage.py sqlmigrate women 0001 - даэ можливыть подивиттись на запит скл який двіжком направляєтсья
+
+
+                                            ORM SQL
+
+python manage.py shell - вхід в консоль джанго для тестування
+m= Wonem(**kwargs) прототип запису - лінива можель
+m.save() - внесення запису в строку
+
+
+object
+
+w4 = Women.objects.create(title='Ума Турман', content='Биография Ума Турман')
+через обэкт object створює запис відразу в таблиці
+
+Women.objects.all() -  вертає всі записи з таблиці, в консоль тільки 20
+
+Women.objects.filter(title="Ума Турман") - вертає записи відфільтровані по тайтл
+
+__gte – сравнение больше или равно (>=);
+__lte – сравнение меньше или равно (<=).
+Women.objects.filter(pk__gte=2) верне з id більше рівне 2,
+але якщо не знайде то поверне пустий список!!!!
+
+
+get - вертає одне значення лише якщо їх більше або нема, то вертає помилку
+Women.objects.get(pk__gte=2)
+
+order_by
+Women.objects.filter(pk__lte=4).order_by('title') -спочатку фільтер а потім сортування по title
+Women.objects.order_by("-title") -  вдращу вертає все відсортоване, мінус дає зворотній порядок!!!
+
+замына даних або update
+wu = Women.objects.get(pk=2)
+wu.title = 'Марго Робби'
+wu.content = 'Биография Марго Робби'
+Сохраняем новые данные:
+wu.save()
+
+wd = Women.objects.filter(pk__gte=4)
+wd.delete
+
+
+                            Шаблони
+
+def index(request):
+    return render(request,"women/index.html",{some dict with params}) - запуск сорінки по шаблону
+
+{% load static %} -загружає тег статік і потіи він використовується в силках де є статичні файли:
+    href="{% static 'women/images/main.ico' %}" -тобто пишемо спочатку stsatic  а потім сам шлях в папці статікБ
+    а початок дописує джанго
+
+{% url "name of url"%} -вертаэ юрл який прописаний в функцыї
+
+{% url 'get_post' p.pk %} динамійчний юрл адрес з прерданим параметром р
+
+                            Таблицы звязки
+
+ForeignKey – для связей Many to One (поля отношений);
+ManyToManyField – для связей Many to Many (многие ко многим);
+OneToOneField – для связей One to One (один к одному).
+
+ 
+
+models.CASCADE – при удалении записи из первичной модели (у нас это таблица Category) происходит удаление всех записей
+из вторичной модели (Women), связанных с удаляемой категорией;
+models.PROTECT – запрещает удаление записи из первичной модели, если она используется во вторичной (выдает исключение);
+models.SET_NULL – при удалении записи первичной модели устанавливает значение foreign key в NULL у соответствующих записей
+вторичной модели;
+models.SET_DEFAULT – то же самое, что и SET_NULL, только вместо значения NULL устанавливает значение по умолчанию,
+которое должно быть определено через класс ForeignKey;
+models.SET() – то же самое, только устанавливает пользовательское значение;
+models.DO_NOTHING – удаление записи в первичной модели не вызывает никаких действий у вторичных моделей.
+
+                                           Admin
+
+python manage.py createsuperuser - створення суперкористувача
+
+admin.site.register(Women) - реєстрація застосунку в адінці в адмін файлі прописується
+
+
+Зовнішній вигляд записів застосунку, відображає різні галузі
+class WomenAdmin(admin.ModelAdmin):
+    list_display = ('id', 'title', 'time_create', 'photo', 'is_published') які поля відображати в списку
+    list_display_links = ('id', 'title') - по яких силках переходити в самий запис
+    search_fields = ('title', 'content') - по яких полях шукати інфу
+
+
+                                siple tags ___ inclusion tags
+
+створюємо пакет templatetags
+
+register=template.library() - створюємо обєкт класу Library
+
+
+Простий тег просто вертає дані з бази, і вставляється в шаблон через аліас as
+@register.simple_tag() - декоруємо ф-цію simple_tag()
+def get_categories(): - прописуємо логіку роботи тега
+    return Women.objects.all()
+
+Включаючий тег повертає вже готовий кусок HTML сторінки
+
+@register.inclusion_tag("women/list_categories.html") - передаємо хтмл файл який вертатимемо в місце виклику тегу
+def show_categories(cat_selected): - функція в якій отримуємо параметр
+    cat_list = Category.objects.all()
+    return {"cats": cat_list, "cat_selected": cat_selected} - вертаємо словничок який передається в вище вказаний
+    файл який обявлений в декораторі))
+
+
+
+                                forms
+
+створюємо файл - forms.py
+
+наслідуємось від forms.Form
+
+<form action="{% url 'add_page' %}" method="post"> - актіон це переадресаці
+    {% csrf_token %} - це захисний токен
+    {{ form.as_p }} - as_p - це функція яка кожну графу форми відображая як абзац
+
+</form>
+
+
+
+    if request.method == "POST": - перевіряєм чи сторінка загружалась вперше, чи просто щось помилково пішло
+        form = AddPostForm(request.POST) - якщо помилково і метод пост був, то щоб поля лишилися заповненні передаємо в клас параметр request.POST
+        if form.is_valid(): - перевірка форму на валідність
+            # print(form.cleaned_data)
+            try:
+                Women.objects.create(**form.cleaned_data) - запис в базу даних - розпаковуємо словник cleaned_data
+                return redirect("home") редірект
+            except:
+                form.add_error(None, "Ошибка добавления поста") - вертаємо помилку
+    else:
+        form = AddPostForm()
+    return render(request, "women/addpage.html", {"title": "Add page","form":form})
+
