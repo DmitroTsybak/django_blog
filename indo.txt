@@ -235,3 +235,7 @@ previous_page_number() - - -
     paginator=Paginator(posts,2)
     page_number=request.GET.get("page") - отримую сторінку з браузера "?page=###" -
     page_obj=paginator.get_page(page_number) - і отримую обєкт пагінації з даною сторінкою!!!
+
+
+
+                                    Class DetailView
