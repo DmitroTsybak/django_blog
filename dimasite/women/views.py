@@ -1,3 +1,7 @@
+from django.contrib.auth import logout
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView
 from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
@@ -37,7 +41,7 @@ def about(request):
     return render(request, "women/about.html", {"title": "About", "menu": menu, "page_obj": page_obj})
 
 
-class AddPage(CreateView):
+class AddPage(LoginRequiredMixin,CreateView):
     form_class = AddPostForm
     template_name = "women/addpage.html"
     extra_context = {"title":"Add page"}
@@ -120,6 +124,17 @@ class RegisterUser(CreateView):
     success_url = reverse_lazy('login')
 
 
+class LoginUser(LoginView):
+    form_class = LoginUserForm
+    template_name = 'women/login.html'
+    extra_context = {'title': "Авторизація"}
+
+    def get_success_url(self): # редірект у випадку успішної реєстрації!!!
+        return reverse_lazy('home')
+
+def logout_user(request):
+    logout(request)
+    return redirect('home')
 
 def categories(request, num):
     if num > 60:

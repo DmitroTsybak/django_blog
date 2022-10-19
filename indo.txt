@@ -235,7 +235,46 @@ previous_page_number() - - -
     paginator=Paginator(posts,2)
     page_number=request.GET.get("page") - отримую сторінку з браузера "?page=###" -
     page_obj=paginator.get_page(page_number) - і отримую обєкт пагінації з даною сторінкою!!!
+    а потім в фуекціїпредставлення передаю як параметрі всіх ділов!!!
 
 
 
                                     Class DetailView
+
+
+                                    registration
+
+
+class RegisterUser(CreateView): - наслідується відстандартного класу форми
+    form_class = RegisterUserForm - від якої форми безпосередньо наслідується, в файлі форми метакласом розширяєм і model=user
+    template_name = "women/register.html"
+    extra_context = {'title':"Реєстрація"}
+    success_url = reverse_lazy('login')
+
+також заповнюємо поля які потрібно виводитиЮ вони ідуть по стандарту - можна їхвигляд переоприділяти!!!!
+
+
+                                      avtorization
+
+class LoginUser(LoginView):
+    form_class = LoginUserForm
+    template_name = 'women/login.html'
+    extra_context = {'title': "Авторизація"}
+
+    def get_success_url(self): # редірект у випадку успішної реєстрації!!!
+        return reverse_lazy('home')
+
+    LoginUserForm(AuthenticationForm) - стандартне наслідування від django класу
+
+    взнати чи зареєстрований користувач можна через request.user.is_authenticated !!!
+    а через це user.username - можна вивести імя користувача
+
+
+                                              exit
+вистачає функції, прописуємо в урлах шлях і в django function logout - передаємо реквест і по бажанню робимо редірект на
+нову сторінку, або не робимо
+
+def logout_user(request):
+    logout(request)
+    return redirect('home')
+
