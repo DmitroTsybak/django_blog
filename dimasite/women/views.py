@@ -1,5 +1,4 @@
 from django.contrib.auth import logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView
 from django.core.paginator import Paginator
@@ -7,44 +6,41 @@ from django.http import HttpResponse, HttpResponseNotFound, Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, CreateView
+from django.views.decorators.cache import cache_page
 
 from .models import *
 from .forms import *
 
 # Create your views here.
 
-menu = [{'title': "О сайте", 'url_name': 'about'},
-        {'title': "Добавить статью", 'url_name': 'add_page'},
-        {'title': "Обратная связь", 'url_name': 'contact'},
+menu = [{'title': "Про сайт", 'url_name': 'about'},
+        {'title': "Добавити статтю", 'url_name': 'add_page'},
+        {'title': "Зворотній зв'язок", 'url_name': 'contact'},
         ]
 
 
+# @cache_page(60)
 def index(request):
-    posts = Women.objects.filter(is_published=True)
+    posts = Women.objects.filter(is_published=True).select_related("category")
     paginator = Paginator(posts, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     context = {'cat_selected': 0,
                'page_obj': page_obj,
-               'title': 'Главная страница'}
+               'title': 'Головна сторінка'}
     return render(request, "women/index.html", context=context)
 
 
 def about(request):
-    posts = Women.objects.all()
-    paginator = Paginator(posts, 5)
 
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    return render(request, "women/about.html", {"title": "About", "menu": menu, "page_obj": page_obj})
+    return render(request, "women/about.html", {"title": "About"})
 
 
 class AddPage(LoginRequiredMixin,CreateView):
     form_class = AddPostForm
     template_name = "women/addpage.html"
-    extra_context = {"title":"Add page"}
+    extra_context = {"title":"Добавити статтю"}
 
 
 
@@ -68,12 +64,11 @@ class AddPage(LoginRequiredMixin,CreateView):
 #     return render(request, "women/addpage.html", {"title": "Add page", "form": form})
 
 
-def contact(request):
-    return render(request, "women/others.html", {"title": "Contact"})
+class Contact(CreateView):
+    pass
 
 
-def login(request):
-    return render(request, "women/others.html", {"title": "Login"})
+
 
 
 class ShowPost(DetailView):
@@ -105,8 +100,8 @@ class ShowPost(DetailView):
 
 
 def show_categories(request, cat_slug):
-    cat = Category.objects.get(slug=cat_slug)
-    posts = Women.objects.filter(category_id=cat.id, is_published=True)
+    cat = Category.objects.filter(slug=cat_slug)[0]
+    posts = Women.objects.filter(category_id=cat.id, is_published=True).select_related("category")
     paginator = Paginator(posts, 5)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)

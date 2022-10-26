@@ -278,3 +278,53 @@ def logout_user(request):
     logout(request)
     return redirect('home')
 
+
+
+                                            debug
+p.cat - Якщо ця графа ключ до іншої таблиці то відбувається виконання лінивого запиту до бази даних,
+атоматично в тій стоці де є цей код. І іноді цей запит перегружає базу даних. Тому кразе використовувати
+зжаті запити!!
+
+
+select_related(key) – «жадная» загрузка связанных данных по внешнему ключу key, который имеет тип ForeignKey;
+prefetch_related(key) – «жадная» загрузка связанных данных по внешнему ключу key, который имеет тип ManyToManyField.
+
+добавляється через крапку в кінець самого заиту до бази!! -  і в дужжках ключ з звязаної бази даних!
+posts = Women.objects.filter(is_published=True).select_related("category")
+
+                                            cash
+
+кеш на рівні файла, створюємо папку з кешом в корневій системі
+
+кеш на рівні функцій відображення
+from django.views.decorators.cache import cache_page
+далі іде декоратор з часом збереженння кеша
+@cache_page(60)
+def index(request):
+
+
+
+кеш на рівні шаблона
+
+{% load cache %}
+И, затем, мы его используем для сайдбара:
+
+{% cache 60 sidebar %} - де число кылькысть секунд, а sidebar - назва кеша, тому впринципы може бути довыльною
+...
+{% endcache %}
+
+кеш окремих строк коду!!!
+cache.set() – сохранение произвольных данных в кэш по ключу;
+cache.get() – выбор произвольных данных из кэша по ключу;
+cache.add() – заносит новое значение в кэш, если его там еще нет (иначе данная операция игнорируется);
+cache.get_or_set() – извлекает данные из кэша, если их нет, то автоматически заносится значение по умолчанию;
+cache.delete() – удаление данных из кэша по ключу;
+cache.clear() – полная очистка кэша.
+
+
+def show_categories(cat_selected):
+    categories=cache.get('categories')
+    if not categories:
+        categories = Category.objects.all()
+        cache.set('categories',categories,60)
+    return {"cats": categories, "cat_selected": cat_selected}
